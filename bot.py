@@ -1,16 +1,1 @@
-import telebot
-import os
-
-TOKEN = os.getenv('BOT_TOKEN')
-bot = telebot.TeleBot(TOKEN)
-
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, "আসালামু আলাইকুম সোনা! আমি অন আছি ✅")
-
-@bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, f"তুমি বললা: {message.text}")
-
-print("Bot is running...")
-bot.polling(none_stop=True)
+import telebotfrom telebot import typesimport osTOKEN = "8989526607:AAEcVrrIo04v9SmQEfCLzj1qC658gVS57BM"bot = telebot.TeleBot(TOKEN)# তোমার দেওয়া Channel IDCHANNEL1 = -1002637580522 # OTP GroupCHANNEL2 = -1003992566258 # Support Group# User data temp save করার জন্যuser_data = {}balance = {}# Force Join Checkdef check_join(user_id):    try:        ch1 = bot.get_chat_member(CHANNEL1, user_id).status        ch2 = bot.get_chat_member(CHANNEL2, user_id).status        return ch1 in ['member', 'administrator', 'creator'] and ch2 in ['member', 'administrator', 'creator']    except:        return False# Main Keyboarddef main_keyboard():    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)    markup.row("📱 Get Number", "🔑 2Fa")    markup.row("🤖 Api Number", "🚦 Live Traffic")    markup.row("🌐 Language")    markup.row("💸 Withdraw", "💰 Balance")    return markup# Start Command@bot.message_handler(commands=['start'])def start(message):    user_id = message.from_user.id    if not check_join(user_id):        markup = types.InlineKeyboardMarkup()        markup.add(types.InlineKeyboardButton("📢 OTP Group", url="https://t.me/c/2637580522"))        markup.add(types.InlineKeyboardButton("📢 Support Group", url="https://t.me/c/3992566258"))        markup.add(types.InlineKeyboardButton("✅ Verify Now", callback_data="verify"))        bot.send_message(message.chat.id, "বট ব্যবহার করতে ২ টা চ্যানেলে জয়েন করো সোনা", reply_markup=markup)    else:        bot.send_message(message.chat.id, "আসালামু আলাইকুম সোনা! আমি অন আছি ✅", reply_markup=main_keyboard())# Verify Button@bot.callback_query_handler(func=lambda call: call.data == "verify")def verify(call):    if check_join(call.from_user.id):        bot.send_message(call.message.chat.id, "ভেরিফাই সফল ✅", reply_markup=main_keyboard())    else:        bot.answer_callback_query(call.id, "আগে ২ টা চ্যানেলে জয়েন করো")# Get Number@bot.message_handler(func=lambda m: m.text == "📱 Get Number")def get_number_menu(message):    markup = types.InlineKeyboardMarkup()    markup.add(types.InlineKeyboardButton("facebook", callback_data="fb"))    markup.add(types.InlineKeyboardButton("instagram", callback_data="ig"))    bot.send_message(message.chat.id, "Platform সিলেক্ট করো", reply_markup=markup)# API Number@bot.message_handler(func=lambda m: m.text == "🤖 Api Number")def api_number_menu(message):    markup = types.InlineKeyboardMarkup()    markup.add(types.InlineKeyboardButton("🔢 Set Range", callback_data="set_range"))    markup.add(types.InlineKeyboardButton("📱 Get API Number", callback_data="get_api"))    markup.add(types.InlineKeyboardButton("⬅️ Back", callback_data="back"))    bot.send_message(message.chat.id, "API Panel", reply_markup=markup)@bot.callback_query_handler(func=lambda call: call.data == "set_range")def set_range(call):    msg = bot.send_message(call.message.chat.id, "Please enter the Range ID (e.g., 22898):")    bot.register_next_step_handler(msg, save_range)def save_range(message):    user_data[message.from_user.id] = {"range": message.text}    bot.send_message(message.chat.id, f"✅ Range saved: {message.text}")@bot.callback_query
