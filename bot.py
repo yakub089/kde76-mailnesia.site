@@ -31,6 +31,29 @@ def main_keyboard():
     markup.row("🌐 Language")
     markup.row("💸 Withdraw", "💰 Balance")
     return markup
+    @bot.message_handler(func=lambda message: message.text == 'facebook')
+def facebook_countries(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(
+        types.KeyboardButton('🇧🇩 Bangladesh'),
+        types.KeyboardButton('🇮🇳 India'),
+        types.KeyboardButton('🇺🇸 USA'),
+        types.KeyboardButton('🇬🇧 UK'),
+        types.KeyboardButton('🔙 Back')
+    )
+    bot.send_message(message.chat.id, "দেশ সিলেক্ট করো:", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text == 'instagram')
+def instagram_countries(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(
+        types.KeyboardButton('🇧🇩 Bangladesh'),
+        types.KeyboardButton('🇮🇳 India'),
+        types.KeyboardButton('🇺🇸 USA'),
+        types.KeyboardButton('🇬🇧 UK'),
+        types.KeyboardButton('🔙 Back')
+    )
+    bot.send_message(message.chat.id, "দেশ সিলেক্ট করো:", reply_markup=markup)
 
 # Start Command
 @bot.message_handler(commands=['start'])
@@ -61,44 +84,42 @@ def get_number_menu(message):
     markup.add(types.InlineKeyboardButton("instagram", callback_data="ig"))
     bot.send_message(message.chat.id, "Platform সিলেক্ট করো", reply_markup=markup)
 
+# API Keyboard
+def api_keyboard():
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.row("🔢 Set Range", "📱 Get API Number", "⬅️ Back")
+    return markup
+
 # API Number
 @bot.message_handler(func=lambda m: m.text == "🤖 Api Number")
 def api_number_menu(message):
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("🔢 Set Range", callback_data="set_range"))
-    markup.add(types.InlineKeyboardButton("📱 Get API Number", callback_data="get_api"))
-    markup.add(types.InlineKeyboardButton("⬅️ Back", callback_data="back"))
-    bot.send_message(message.chat.id, "API Panel", reply_markup=markup)
+    bot.send_message(message.chat.id, "API Panel", reply_markup=api_keyboard())
 
-@bot.callback_query_handler(func=lambda call: call.data == "set_range")
-def set_range(call):
-    msg = bot.send_message(call.message.chat.id, "Please enter the Range ID (e.g., 22898):")
+@bot.message_handler(func=lambda m: m.text == "🔢 Set Range")
+def set_range(message):
+    msg = bot.send_message(message.chat.id, "Please enter the Range ID (e.g., 22898):")
     bot.register_next_step_handler(msg, save_range)
 
 def save_range(message):
     user_data[message.from_user.id] = {"range": message.text}
-    bot.send_message(message.chat.id, f"✅ Range saved: {message.text}")
+    bot.send_message(message.chat.id, f"✅ Range saved: {message.text}", reply_markup=api_keyboard())
 
-@bot.callback_query_handler(func=lambda call: call.data == "get_api")
-def get_api(call):
-    uid = call.from_user.id
+@bot.message_handler(func=lambda m: m.text == "📱 Get API Number")
+def get_api(message):
+    uid = message.from_user.id
     if uid not in user_data or "range" not in user_data[uid]:
-        bot.send_message(call.message.chat.id, "✅ Range saved as: 🔢 Set Range\nYou can now click '📱 Get Api Num'.")
+        bot.send_message(message.chat.id, "আগে Range সেট করো")
         return
-    # এখানে তোমার Panel API কানেক্ট হবে
-    bot.send_message(call.message.chat.id, """✅ Number Allocated
-
+    bot.send_message(message.chat.id, """✅ Number Allocated
 📱 Number: +224657176849
 🌍 Country: Guinea
 📡 Operator: Mobile
 🔢 Range: 22465XXX
-
 ⏳ Waiting for OTP...""")
 
-@bot.callback_query_handler(func=lambda call: call.data == "back")
-def back(call):
-    bot.send_message(call.message.chat.id, "Main Menu", reply_markup=main_keyboard())
-
+@bot.message_handler(func=lambda m: m.text == "⬅️ Back")
+def back(message):
+    bot.send_message(message.chat.id, "Main Menu", reply_markup=main_keyboard())
 # Balance
 @bot.message_handler(func=lambda m: m.text == "💰 Balance")
 def balance_check(message):
